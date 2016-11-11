@@ -1,5 +1,51 @@
 # Taskfile
-This repository contains the default Taskfile template for getting started in your own projects.
+This repository contains the default Taskfile template for getting started in your own projects. A Taskfile is a bash (or zsh etc.) script that follows a specific format. It's called `Taskfile`, sits in the root of your project (alongside your package.json) and contains the tasks to build your project.
+
+```sh
+#!/bin/bash
+PATH=./node_modules/.bin:$PATH
+
+function install {
+    npm install
+}
+
+function build {
+    webpack
+}
+
+function start {
+    build
+    python -m SimpleHTTPServer 9000
+}
+
+function test {
+    mocha test/**/*.js
+}
+
+function default {
+    start
+}
+
+function help {
+    echo "$0 <task> <args>"
+    echo "Tasks:"
+    compgen -A function | cat -n
+}
+
+TIMEFORMAT="Task completed in %3lR"
+time ${@:-default}
+```
+
+And to run a task:
+
+    $ run build
+    Hash: 31b6167c7c8f2920e0d2
+    Version: webpack 2.1.0-beta.25
+    Time: 4664ms
+       Asset     Size  Chunks             Chunk Names
+    index.js  1.96 MB       0  [emitted]  index
+        + 353 hidden modules
+    Task completed in 0m5.008s
 
 ### Install
 To "install", add the following to you `.bashrc` or `.zshrc` (or `.whateverrc`):

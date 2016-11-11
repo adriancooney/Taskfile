@@ -10,6 +10,8 @@ function default {
 }
 
 function help {
+    echo "$0 <task> <args>"
+    echo "Tasks:"
     compgen -A function | cat -n
 }
 

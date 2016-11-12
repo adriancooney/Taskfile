@@ -2,15 +2,15 @@
 PATH=./node_modules/.bin:$PATH
 
 function install {
-
+    echo "install task not implemented"
 }
 
 function build {
-    
+    echo "build task not implemented"
 }
 
 function start {
-
+    echo "start task not implemented"
 }
 
 function default {

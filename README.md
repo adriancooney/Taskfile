@@ -14,7 +14,7 @@ function build {
 }
 
 function start {
-    build
+    build # Call task dependency
     python -m SimpleHTTPServer 9000
 }
 
@@ -23,6 +23,7 @@ function test {
 }
 
 function default {
+    # Default task to execute
     start
 }
 
@@ -233,7 +234,42 @@ The `compgen -A function` is a [bash builtin](https://www.gnu.org/software/bash/
          3  help
     Task completed in 0m0.005s
 
-#### Cool Runnings
+#### `task:` namespace
+If you find you need to breakout some code into reusable functions that aren't tasks by themselves and don't want them cluttering your `help` output, you can introduce a namespace to your task functions. Bash is pretty lenient with it's function names so you could, for example, prefix a task function with  `task:`. Just remember to use that namespace when you're calling other tasks and in your `task:$@` entrypoint!
+
+```sh
+#!/bin/bash
+PATH=./node_modules/.bin
+
+function task:build-web {
+    build-target web
+}
+
+function task:build-desktop {
+    build-target desktop
+}
+
+function build-target {
+    BUILD_TARGET=$1 webpack --production
+}
+
+function task:default {
+    task:help
+}
+
+function task:help {
+    echo "$0 <task> <args>"
+    echo "Tasks:"
+
+    # We pick out the `task:*` functions
+    compgen -A function | sed -En 's/task:(.*)/\1/p' | cat -n
+}
+
+TIMEFORMAT="Task completed in %3lR"
+time "task:${@:-default}"
+```
+
+#### Executing tasks
 So typing out `./Taskfile` every time you want to run a task is a little lousy.  just flows through the keyboard so naturally that I wanted something better. The solution for less keystrokes was dead simple: add an alias for `run` (or `task`, whatever you fancy) and stick it in your *.zshrc.* Now, it now looks the part.
 
     $ alias run=./Taskfile

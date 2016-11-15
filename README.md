@@ -287,6 +287,32 @@ Alongside my `run` alias, I also added a `run-init` to my *.zshrc* to quickly ge
     beep boop built
     Task completed in 0m1.008s
 
+#### Importing from npm
+If you've the incredible [jq](https://stedolan.github.io/jq/manual/) installed (you should, it's so useful), here's a handy oneliner to import your scripts from your package.json into a fresh Taskfile. Copy and paste this into your terminal with your package.json in the working directory:
+
+```sh
+run-init && (head -n 3 Taskfile && jq -r '.scripts | to_entries[] | "function \(.["key"]) {\n    \(.["value"])\n}\n"' package.json | sed -E 's/npm run ([a-z\:A-Z]+)/\1/g' && tail -n 8 Taskfile) > Taskfile.sh && mv Taskfile.sh Taskfile && chmod +x Taskfile 
+```
+
+And the importer explained:
+
+```sh
+$ run-init && \ # Download a fresh Taskfile template
+    (
+        head -n 3 Taskfile && \ # Take the Taskfile template header
+        jq -r '.scripts | to_entries[] | "function \(.["key"]) {\n    \(.["value"])\n}\n"' package.json \ # Extract the scripts using JQ and create bash task functions
+            | sed -E 's/npm run ([a-z\:A-Z]+)/\1/g' \ # Replace any `npm run <task>` with the task name
+        && tail -n 8 Taskfile # Grab the Taskfile template footer
+    ) \ # Combine header, body and footer
+    > Taskfile.sh && mv Taskfile.sh Taskfile && chmod +x Taskfile # Pipe out to Taskfile
+```
+
+To fix up your `npm run-scripts` to use the Taskfile, you can also use JQ to do this automatically for you:
+
+```sh
+jq '.scripts = (.scripts | to_entries | map(.value = "./Taskfile \(.key)") | from_entries)' package.json > package.json.2 && mv package.json.2 package.json
+```
+
 #### Free Features
 * Conditions and loops. Bash and friends have support for conditions and loops so you can error if parameters aren’t passed or if your build fails.
 * Streaming and piping. Don’t forget, we’re in a shell and you can use all your favourite redirections and piping techniques.

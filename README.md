@@ -48,7 +48,7 @@ And to run a task:
         + 353 hidden modules
     Task completed in 0m5.008s
 
-### Install
+## Install
 To "install", add the following to you `.bashrc` or `.zshrc` (or `.whateverrc`):
 
     # Quick start with the default Taskfile template
@@ -57,7 +57,7 @@ To "install", add the following to you `.bashrc` or `.zshrc` (or `.whateverrc`):
     # Run your tasks like: run <task>
     alias run=./Taskfile
 
-### Usage
+## Usage
 Open your directory and run `run-init` to add the default Taskfile template to your project directory:
 
     $ cd my-project
@@ -73,8 +73,8 @@ Open the `Taskfile` and add your tasks. To run tasks, use `run`:
          3  help
     Task completed in 0m0.005s
 
-### Techniques
-#### Arguments
+## Techniques
+### Arguments
 Let’s pass some arguments to a task. Arguments are accessible to the task via the `$1, $2, $n..` variables. Let’s allow us to specify the port of the HTTP server:
 
 ```sh
@@ -92,7 +92,7 @@ And if we run the `serve` task with a new port:
     $ ./Taskfile serve 9090
     Serving HTTP on 0.0.0.0 port 9090 ...
 
-#### Using npm Packages
+### Using npm Packages
 One of the most powerful things about npm run-scripts (who am I kidding, it’s definitely the most powerful thing) is the ability to use the CLI interfaces for many of the popular packages on npm such as *babel* or *webpack.* The way npm achieves this is by extending the search `PATH` for binaries to include `./node_modules/.bin`. We can do this to very easily too by extending the `PATH` at the top of our Taskfile to include this directory. This will enable us to use our favourite binaries just like we would in an npm run-script:
 
 ```sh
@@ -118,7 +118,7 @@ function test {
 "$@"
 ```
 
-#### Task Dependencies
+### Task Dependencies
 Sometimes tasks depend on other tasks to be completed before they can start. To add another task as a dependency, simply call the task's function at the top of the dependant task's function.
 
 ```sh
@@ -145,7 +145,7 @@ function deploy {
 "$@"
 ```
 
-#### Parallelisation
+### Parallelisation
 To run tasks in parallel, you can us Bash’s `&` operator in conjunction with `wait`. The following will build the two tasks at the same time and wait until they’re completed before exiting.
 
 ```sh
@@ -174,7 +174,7 @@ And execute the `build-all` task:
     built web
     built mobile
 
-#### Default task
+### Default task
 To make a task the default task called when no arguments are passed, we can use bash’s default variable substitution `${VARNAME:-<default value>}` to return `default` if `$@` is empty. 
 
 ```sh
@@ -195,7 +195,7 @@ function default {
 Now when we run `./Taskfile`, the `default` function is called.
 
 
-#### Runtime Statistics
+### Runtime Statistics
 To add some nice runtime statistics like Gulp so you can keep an eye on build times, we use the built in `time` and pass if a formatter.
 
 ```js
@@ -221,7 +221,7 @@ And if we execute the `build` task:
     beep boop built 
     Task completed in 0m1.008s
 
-#### Help
+### Help
 The final addition I recommend adding to your base Taskfile is the  task which emulates, in a much more basic fashion,  (with no arguments). It prints out usage and the available tasks in the Taskfile to show us what tasks we have available to ourself.
 
 The `compgen -A function` is a [bash builtin](https://www.gnu.org/software/bash/manual/html_node/Programmable-Completion-Builtins.html) that will list the functions in our Taskfile (i.e. tasks). This is what it looks like when we run the  task:
@@ -234,7 +234,7 @@ The `compgen -A function` is a [bash builtin](https://www.gnu.org/software/bash/
          3  help
     Task completed in 0m0.005s
 
-#### `task:` namespace
+### `task:` namespace
 If you find you need to breakout some code into reusable functions that aren't tasks by themselves and don't want them cluttering your `help` output, you can introduce a namespace to your task functions. Bash is pretty lenient with it's function names so you could, for example, prefix a task function with  `task:`. Just remember to use that namespace when you're calling other tasks and in your `task:$@` entrypoint!
 
 ```sh
@@ -269,7 +269,7 @@ TIMEFORMAT="Task completed in %3lR"
 time "task:${@:-default}"
 ```
 
-#### Executing tasks
+### Executing tasks
 So typing out `./Taskfile` every time you want to run a task is a little lousy.  just flows through the keyboard so naturally that I wanted something better. The solution for less keystrokes was dead simple: add an alias for `run` (or `task`, whatever you fancy) and stick it in your *.zshrc.* Now, it now looks the part.
 
     $ alias run=./Taskfile
@@ -277,7 +277,7 @@ So typing out `./Taskfile` every time you want to run a task is a little lousy. 
     beep boop built
     Task completed in 0m1.008s
 
-#### Quickstart
+### Quickstart
 Alongside my `run` alias, I also added a `run-init` to my *.zshrc* to quickly get started with a new Taskfile in a project. It downloads a [small Taskfile template](http://github.com/adriancooney/Taskfile) to the current directory and makes it executable:
 
     $ alias run-init="curl -so Taskfile https://medium.com/r/?url=https%3A%2F%2Fraw.githubusercontent.com%2Fadriancooney%2FTaskfile%2Fmaster%2FTaskfile.template && chmod +x Taskfile"
@@ -287,7 +287,7 @@ Alongside my `run` alias, I also added a `run-init` to my *.zshrc* to quickly ge
     beep boop built
     Task completed in 0m1.008s
 
-#### Importing from npm
+### Importing from npm
 If you've the incredible [jq](https://stedolan.github.io/jq/manual/) installed (you should, it's so useful), here's a handy oneliner to import your scripts from your package.json into a fresh Taskfile. Copy and paste this into your terminal with your package.json in the working directory:
 
 ```sh
@@ -300,7 +300,8 @@ And the importer explained:
 $ run-init && \ # Download a fresh Taskfile template
     (
         head -n 3 Taskfile && \ # Take the Taskfile template header
-        jq -r '.scripts | to_entries[] | "function \(.["key"]) {\n    \(.["value"])\n}\n"' package.json \ # Extract the scripts using JQ and create bash task functions
+        # Extract the scripts using JQ and create bash task functions
+        jq -r '.scripts | to_entries[] | "function \(.["key"]) {\n    \(.["value"])\n}\n"' package.json \ 
             | sed -E 's/npm run ([a-z\:A-Z]+)/\1/g' \ # Replace any `npm run <task>` with the task name
         && tail -n 8 Taskfile # Grab the Taskfile template footer
     ) \ # Combine header, body and footer
@@ -313,7 +314,7 @@ To fix up your `npm run-scripts` to use the Taskfile, you can also use JQ to do 
 jq '.scripts = (.scripts | to_entries | map(.value = "./Taskfile \(.key)") | from_entries)' package.json > package.json.2 && mv package.json.2 package.json
 ```
 
-#### Free Features
+### Free Features
 * Conditions and loops. Bash and friends have support for conditions and loops so you can error if parameters aren’t passed or if your build fails.
 * Streaming and piping. Don’t forget, we’re in a shell and you can use all your favourite redirections and piping techniques.
 * All your standard tools like `rm` and `mkdir`.

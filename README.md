@@ -49,7 +49,7 @@ And to run a task:
     Task completed in 0m5.008s
 
 ## Install
-To "install", add the following to you `.bashrc` or `.zshrc` (or `.whateverrc`):
+To "install", add the following to your `.bashrc` or `.zshrc` (or `.whateverrc`):
 
     # Quick start with the default Taskfile template
     alias run-init="curl -so Taskfile https://raw.githubusercontent.com/adriancooney/Taskfile/master/Taskfile.template && chmod +x Taskfile"

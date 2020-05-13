@@ -8,7 +8,7 @@ edit() {
 help() {
     echo "$0 <task> <args>"
     echo "Tasks:"
-    compgen -A function | cat -n
+    compgen -A function | grep -v "_" | cat -n
 }
 
 TIMEFORMAT="Task completed in %3lR"

@@ -2,29 +2,23 @@
 
 This is a fork of Taskfile, optimised as a task runner. See https://github.com/adriancooney/Taskfile for the original project.
 
-This repository contains the default `Taskfile.sh` for getting started in your own projects. It runs task files, a bash (or zsh etc.) script that follows a specific format. It's called `.Taskfile`, sits in the current or parent directory hierarchy of your project (alongside your package.json) and contains functions that perform tasks.
+This repository contains the runner `Taskfile.sh` for getting started in your own projects. It runs task files, a bash (or zsh etc.) script that contains functions that can be called via the runner. These must be called `.Taskfile`. The runner detects any task files in the current, parent, grandparent etc directory  of the directory you're in.
 
-The `Taskfile.sh` in this repository, when added to a directory in your PATH, will include the .Taskfiles and allow you to run them.
+The `Taskfile.sh` in this repository, when added to a directory in your PATH, contains the runner and help function which lists all the detected tasks.
 
 An example `.Taskfile` could look like this:
 
 ```sh
-# git switch using part of the branch name.
+# git fuzzy branch switcher.
 sw() {
     git switch $(git branch | grep $1 | head -n1)
-}
-
-# flush macos dns cache
-flush-dnscache() {
-    sudo launchctl stop /Library/LaunchDaemons/homebrew.mxcl.dnsmasq.plist
-    sudo launchctl start /Library/LaunchDaemons/homebrew.mxcl.dnsmasq.plist
 }
 ```
 
 And to run a task:
 
 
-    $ run sw CSW-22
+    $ t sw CSW-22
     Using: //Users/sander/.Taskfile
     Using: //Users/sander/dev/.Taskfile
      
@@ -34,30 +28,21 @@ And to run a task:
 
 
 ## Install
-To "install", git clone this repo and add a symlink to `Taskfile.sh` to you a directory in your path, such as `~/bin`. Add an alias to your .bashrc to shorthen it to something like `run`:
-
-```sh
-    alias run=Taskfile.sh
-```
+To "install", git clone this repo and add a symlink to `Taskfile.sh` to you a directory in your path, such as `~/bin/t`. Run `chmod +x t` to make the runner executable. Klaar is kees!
 
 ## Usage
 
 Open your directory and create a new `.Taskfile`. Edit it with your favourite editor and add your tasks.
 
-To run tasks, use `run` (which calls `help`:
+To view available tasks, use `t` (which calls the `help` task):
 
-    $ run
+    $ t
     Using: //Users/sander/.Taskfile
     Using: //Users/sander/dev/.Taskfile
      
     /Users/sander/bin/Taskfile.sh <task> <args>
     Tasks:
          1  edit
-         2  flush-dnscache
-         3  help
-         4  sw
+         2  help
+         3  sw
     Task completed in 0m0.004s
-
-
-
-The Taskfile format is something I’d love to see become more widespread and it’d be awesome if we could all come together on a standard of sorts. Things like simple syntax highlighting extensions or best practices guide would be awesome to formalise.

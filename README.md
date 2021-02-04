@@ -9,9 +9,9 @@ The `Taskfile.sh` in this repository, when added to a directory in your PATH, co
 An example `.Taskfile` could look like this:
 
 ```sh
-# git fuzzy branch switcher.
 sw() {
-    git switch $(git branch | grep $1 | head -n1)
+  # git fuzzy branch switcher.
+  git switch $(git branch | grep $1 | head -n1)
 }
 ```
 

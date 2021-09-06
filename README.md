@@ -330,7 +330,7 @@ When writing my Taskfile, these are some considerations I found useful:
 * Don’t completely ditch the `package.json`. You should proxy the scripts to the Taskfile by calling the Taskfile directory in your package.json like `"test": "./Taskfile test"`. You can still pass arguments to your scripts with the `--` special argument and `npm run build -- --production` if necessary.
 
 #### Caveats
-The only caveat with the Taskfile format is we forgo compatibility with Windows which sucks. Of course, users can install Cygwin but one of most attractive things about the Taskfile format is not having to install external software to run the tasks. Hopefully, [Microsoft’s native bash shell in Windows 10](http://www.howtogeek.com/249966 how-to-install-and-use-the-linux-bash-shell-on-windows-10/) can do work well for us in the future.
+The only caveat with the Taskfile format is we forgo compatibility with Windows which sucks. Of course, users can install Cygwin but one of most attractive things about the Taskfile format is not having to install external software to run the tasks. Hopefully, [Microsoft’s native bash shell in Windows 10](https://www.howtogeek.com/249966%20how-to-install-and-use-the-linux-bash-shell-on-windows-10/) can do work well for us in the future.
 
 *****
 

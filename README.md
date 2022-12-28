@@ -6,31 +6,38 @@ This repository contains the default Taskfile template for getting started in yo
 PATH=./node_modules/.bin:$PATH
 
 function install {
+    : "Install dependencies"
     npm install
 }
 
 function build {
+    : "Build the project"
     webpack
 }
 
 function start {
+    : "Start a local server"
     build # Call task dependency
     python -m SimpleHTTPServer 9000
 }
 
 function test {
+    : "Run test suite"
     mocha test/**/*.js
 }
 
 function default {
+    : "Run a default task"
     # Default task to execute
     start
 }
 
 function help {
-    echo "$0 <task> <args>"
-    echo "Tasks:"
-    compgen -A function | cat -n
+    : "Auto-generate list of tasks, including documentation in the form of these noop statements"
+    : "They can span multiple lines if needed"
+    compgen -A function | while read -r name ; do
+		paste <(printf '%s' "$name") <(type "$name" | sed -nEe 's/^[[:space:]]*: ?"(.*)";/\1/p')
+	done
 }
 
 TIMEFORMAT="Task completed in %3lR"
@@ -53,7 +60,7 @@ To "install", add the following to your `.bashrc` or `.zshrc` (or `.whateverrc`)
 
     # Quick start with the default Taskfile template
     alias run-init="curl -so Taskfile https://raw.githubusercontent.com/adriancooney/Taskfile/master/Taskfile.template && chmod +x Taskfile"
-    
+
     # Run your tasks like: run <task>
     alias run=./Taskfile
 
@@ -66,12 +73,12 @@ Open your directory and run `run-init` to add the default Taskfile template to y
 Open the `Taskfile` and add your tasks. To run tasks, use `run`:
 
     $ run help
-    ./Taskfile <task> <args>
-    Tasks:
-         1  build
-         2  build-all
-         3  help
-    Task completed in 0m0.005s
+    build   Build the project
+    default Run a default task
+    help    Auto-generate list of tasks, including documentation in the form of these noop statements
+    install Install dependencies
+    start   Start the server
+    Task completed in 0m0.017s
 
 ## Techniques
 ### Arguments
@@ -175,7 +182,7 @@ And execute the `build-all` task:
     built mobile
 
 ### Default task
-To make a task the default task called when no arguments are passed, we can use bash’s default variable substitution `${VARNAME:-<default value>}` to return `default` if `$@` is empty. 
+To make a task the default task called when no arguments are passed, we can use bash’s default variable substitution `${VARNAME:-<default value>}` to return `default` if `$@` is empty.
 
 ```sh
 #!/bin/bash
@@ -198,7 +205,7 @@ Now when we run `./Taskfile`, the `default` function is called.
 ### Runtime Statistics
 To add some nice runtime statistics like Gulp so you can keep an eye on build times, we use the built in `time` and pass if a formatter.
 
-```js
+```sh
 #!/bin/bash
 PATH=./node_modules/.bin:$PATH
 
@@ -217,22 +224,22 @@ time ${@:-default}
 
 And if we execute the `build` task:
 
-    $ ./Taskfile build 
-    beep boop built 
+    $ ./Taskfile build
+    beep boop built
     Task completed in 0m1.008s
 
 ### Help
-The final addition I recommend adding to your base Taskfile is the  task which emulates, in a much more basic fashion,  (with no arguments). It prints out usage and the available tasks in the Taskfile to show us what tasks we have available to ourself.
+The final addition I recommend adding to your base Taskfile is the task which emulates, in a much more basic fashion, (with no arguments). It prints out usage and the available tasks in the Taskfile to show us what tasks we have available to ourself.
 
-The `compgen -A function` is a [bash builtin](https://www.gnu.org/software/bash/manual/html_node/Programmable-Completion-Builtins.html) that will list the functions in our Taskfile (i.e. tasks). This is what it looks like when we run the  task:
+The `compgen -A function` is a [bash builtin](https://www.gnu.org/software/bash/manual/html_node/Programmable-Completion-Builtins.html) that will list the functions in our Taskfile (i.e. tasks). Combine this with `type` to print the function body and `sed` to select the documentation lines and a `paste` to print them together. This is what it looks like when we run the task:
 
     $ ./Taskfile help
-    ./Taskfile <task> <args>
-    Tasks:
-         1  build
-         2  default
-         3  help
-    Task completed in 0m0.005s
+    build   Build the project
+    default Run a default task
+    help    Auto-generate list of tasks, including documentation in the form of these noop statements
+    install Install dependencies
+    start   Start the server
+    Task completed in 0m0.017s
 
 ### `task:` namespace
 If you find you need to breakout some code into reusable functions that aren't tasks by themselves and don't want them cluttering your `help` output, you can introduce a namespace to your task functions. Bash is pretty lenient with it's function names so you could, for example, prefix a task function with  `task:`. Just remember to use that namespace when you're calling other tasks and in your `task:$@` entrypoint!
@@ -242,10 +249,12 @@ If you find you need to breakout some code into reusable functions that aren't t
 PATH=./node_modules/.bin
 
 function task:build-web {
+    : "Build for web use"
     build-target web
 }
 
 function task:build-desktop {
+    : "Build for desktop use"
     build-target desktop
 }
 
@@ -254,15 +263,17 @@ function build-target {
 }
 
 function task:default {
+    : "Run a default task"
     task:help
 }
 
 function task:help {
-    echo "$0 <task> <args>"
-    echo "Tasks:"
-
-    # We pick out the `task:*` functions
-    compgen -A function | sed -En 's/task:(.*)/\1/p' | cat -n
+    : "Auto-generate list of tasks, including documentation in the form of these noop statements"
+	compgen -A function | while read -r name ; do
+		if [[ $name =~ ^task: ]] ; then
+			paste <(printf '%s' "${name#task:}") <(type "$name" | sed -nEe 's/^[[:space:]]*: ?"(.*)";/\1/p')
+		fi
+	done
 }
 
 TIMEFORMAT="Task completed in %3lR"
@@ -280,18 +291,21 @@ So typing out `./Taskfile` every time you want to run a task is a little lousy. 
 ### Quickstart
 Alongside my `run` alias, I also added a `run-init` to my *.zshrc* to quickly get started with a new Taskfile in a project. It downloads a [small Taskfile template](http://github.com/adriancooney/Taskfile) to the current directory and makes it executable:
 
-    $ alias run-init="curl -so Taskfile https://medium.com/r/?url=https%3A%2F%2Fraw.githubusercontent.com%2Fadriancooney%2FTaskfile%2Fmaster%2FTaskfile.template && chmod +x Taskfile"
+    $ alias run-init="curl -so Taskfile https://raw.githubusercontent.com/adriancooney/Taskfile/master/Taskfile.template && chmod +x Taskfile"
 
     $ run-init
     $ run build
     beep boop built
     Task completed in 0m1.008s
 
+### Enable tab-completion
+Tab-completion is an extremely useful tool, especially when you're not entirely sure which tasks you have written in your current taskfile. To add completion behavior, download the [completion script found in this repo](https://raw.githubusercontent.com/adriancooney/Taskfile/master/task-completion.bash) and place it in `~/.local/share/bash-completion/completions`. You may have to create that directory.
+
 ### Importing from npm
 If you've the incredible [jq](https://stedolan.github.io/jq/manual/) installed (you should, it's so useful), here's a handy oneliner to import your scripts from your package.json into a fresh Taskfile. Copy and paste this into your terminal with your package.json in the working directory:
 
 ```sh
-run-init && (head -n 3 Taskfile && jq -r '.scripts | to_entries[] | "function \(.["key"]) {\n    \(.["value"])\n}\n"' package.json | sed -E 's/npm run ([a-z\:A-Z]+)/\1/g' && tail -n 8 Taskfile) > Taskfile.sh && mv Taskfile.sh Taskfile && chmod +x Taskfile 
+run-init && (head -n 3 Taskfile && jq -r '.scripts | to_entries[] | "function \(.["key"]) {\n    \(.["value"])\n}\n"' package.json | sed -E 's/npm run ([a-z\:A-Z]+)/\1/g' && tail -n 8 Taskfile) > Taskfile.sh && mv Taskfile.sh Taskfile && chmod +x Taskfile
 ```
 
 And the importer explained:
@@ -301,7 +315,7 @@ $ run-init && \ # Download a fresh Taskfile template
     (
         head -n 3 Taskfile && \ # Take the Taskfile template header
         # Extract the scripts using JQ and create bash task functions
-        jq -r '.scripts | to_entries[] | "function \(.["key"]) {\n    \(.["value"])\n}\n"' package.json \ 
+        jq -r '.scripts | to_entries[] | "function \(.["key"]) {\n    \(.["value"])\n}\n"' package.json \
             | sed -E 's/npm run ([a-z\:A-Z]+)/\1/g' \ # Replace any `npm run <task>` with the task name
         && tail -n 8 Taskfile # Grab the Taskfile template footer
     ) \ # Combine header, body and footer

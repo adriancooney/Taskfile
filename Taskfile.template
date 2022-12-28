@@ -2,25 +2,31 @@
 PATH=./node_modules/.bin:$PATH
 
 function install {
+    : "Install dependencies"
     echo "install task not implemented"
 }
 
 function build {
+    : "Build the project"
     echo "build task not implemented"
 }
 
 function start {
+    : "Start the server"
     echo "start task not implemented"
 }
 
 function default {
+    : "Run a default task"
     start
 }
 
 function help {
-    echo "$0 <task> <args>"
-    echo "Tasks:"
-    compgen -A function | cat -n
+	: "Auto-generate list of tasks, including documentation in the form of these noop statements"
+    : "They can span multiple lines if needed"
+	compgen -A function | while read -r name ; do
+		paste <(printf '%s' "$name") <(type "$name" | sed -nEe 's/^[[:space:]]*: ?"(.*)";/\1/p')
+	done
 }
 
 TIMEFORMAT="Task completed in %3lR"

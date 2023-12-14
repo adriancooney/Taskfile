@@ -5,32 +5,38 @@ This repository contains the default Taskfile template for getting started in yo
 #!/bin/bash
 PATH=./node_modules/.bin:$PATH
 
-function install {
+###### MAIN TASKS
+
+install() {  ## install task
     npm install
 }
 
-function build {
+build() {  ## build task
     webpack
 }
 
-function start {
+start() {  ## start task
     build # Call task dependency
     python -m SimpleHTTPServer 9000
 }
 
-function test {
+function test {  ## test project
     mocha test/**/*.js
 }
+
+###### UTILS
 
 function default {
     # Default task to execute
     start
 }
 
-function help {
-    echo "$0 <task> <args>"
-    echo "Tasks:"
-    compgen -A function | cat -n
+help() {  ## print this help (default)
+	echo "$0 <task> <args>"
+	grep -E '^([a-zA-Z_-]+\(\) {.*?## .*|######* .+)$$' $0 \
+		| sed 's/######* \(.*\)/\n               \1/g' \
+		| sed 's/\([a-zA-Z-]\+\)()/\1/' \
+		| awk 'BEGIN {FS = "{.*?## "}; {printf "\033[93m%-30s\033[0m %s\033[0m\n", $1, $2}'
 }
 
 TIMEFORMAT="Task completed in %3lR"
@@ -67,11 +73,12 @@ Open the `Taskfile` and add your tasks. To run tasks, use `run`:
 
     $ run help
     ./Taskfile <task> <args>
-    Tasks:
-         1  build
-         2  build-all
-         3  help
-    Task completed in 0m0.005s
+                   MAIN TASKS
+    install                        install task
+    build                          build task
+    start                          start task
+                   UTILS
+    help                           print this help
 
 ## Techniques
 ### Arguments

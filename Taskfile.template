@@ -1,26 +1,32 @@
 #!/bin/bash
 PATH=./node_modules/.bin:$PATH
 
-function install {
+###### MAIN TASKS
+
+install() {  ## install task not implemented
     echo "install task not implemented"
 }
 
-function build {
+build() {  ## build task not implemented
     echo "build task not implemented"
 }
 
-function start {
+start() {  ## start task not implemented
     echo "start task not implemented"
 }
 
-function default {
+###### UTILS
+
+default() {
     start
 }
 
-function help {
-    echo "$0 <task> <args>"
-    echo "Tasks:"
-    compgen -A function | cat -n
+help() {  ## print this help (default)
+	echo "$0 <task> <args>"
+	grep -E '^([a-zA-Z_-]+\(\) {.*?## .*|######* .+)$$' $0 \
+		| sed 's/######* \(.*\)/\n               \1/g' \
+		| sed 's/\([a-zA-Z-]\+\)()/\1/' \
+		| awk 'BEGIN {FS = "{.*?## "}; {printf "\033[93m%-30s\033[0m %s\033[0m\n", $1, $2}'
 }
 
 TIMEFORMAT="Task completed in %3lR"
